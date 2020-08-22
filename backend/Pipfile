@@ -10,6 +10,7 @@ flask = "*"
 flask-cors = "*"
 scrapy = "*"
 scrapyd = "*"
+scrapyd-client = "*"
 
 [requires]
 python_version = "3.7"

@@ -1,14 +1,15 @@
 <template>
-  <div>
-    <h1>Data Table</h1>
-  </div>
+  <DataTable1></DataTable1>
 </template>
 
 <script>
+import DataTable1 from "../components/DataTable1";
 export default {
   name: "DataView",
+  components: {
+    DataTable1,
+  },
 };
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
