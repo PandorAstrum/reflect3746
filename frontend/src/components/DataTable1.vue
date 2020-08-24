@@ -59,9 +59,9 @@ export default {
         },
         {
           website: "facebook",
-          termsurl: "https://google.com/terms",
-          privacyurl: "https://google.com/terms",
-          cookieurl: "https://google.com/terms",
+          termsurl: "https://www.facebook.com/legal/terms",
+          privacyurl: "https://www.facebook.com/privacy/explanation",
+          cookieurl: "https://www.facebook.com/policies/cookies/",
         },
       ],
     };

@@ -2,27 +2,21 @@
   <v-container>
     <v-form>
       <v-row>
-        <v-col cols="1" class="mx-auto my-auto"
-          ><v-subheader>WEBSITE</v-subheader></v-col
-        >
+        <v-col cols="1" class="mx-auto my-auto">
+          <v-subheader>WEBSITE</v-subheader>
+        </v-col>
         <v-col cols="11">
-          <v-text-field
-            v-model="firstname"
-            :rules="nameRules"
-            :counter="10"
-            label="URL"
-            required
-          ></v-text-field>
+          <v-text-field v-model="url" :counter="10" label="URL" required></v-text-field>
         </v-col>
       </v-row>
       <v-row>
         <v-col cols="1" class="mx-auto my-auto">
-          <v-subheader>SPIDER</v-subheader></v-col
-        >
+          <v-subheader>SPIDER</v-subheader>
+        </v-col>
         <v-col cols="11">
           <v-select
             v-model="select"
-            :items="items"
+            :items="getSpiderSelection"
             :rules="[(v) => !!v || 'Please Select a spider or create new']"
             label="Select"
             required
@@ -30,55 +24,69 @@
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="1" class="mx-auto"
-          ><v-subheader>OPTIONS</v-subheader></v-col
-        >
+        <v-col cols="1" class="mx-auto">
+          <v-subheader>SETTINGS</v-subheader>
+        </v-col>
         <v-col cols="11">
           <v-row>
-            <v-switch
-              class="mx-4"
-              v-model="switch1"
-              label="Crawl all links"
-              disabled
-            ></v-switch>
-            <v-switch
-              class="mx-4"
-              v-model="switch2"
-              label="Sitemap search (If available)"
-            ></v-switch>
-            <v-switch class="mx-4" v-model="switch3" label="Dynamic"></v-switch>
-            <v-switch
-              class="mx-4"
-              v-model="switch4"
-              label="Use proxies"
-            ></v-switch>
+            <v-switch class="mx-4" v-model="siteMap" label="Sitemap (If exist)"></v-switch>
+            <v-switch class="mx-4" v-model="dynamicJS" label="DynamicJS"></v-switch>
           </v-row>
-
-          <v-text-field
-            label="proxies"
-            hint="enter multiple with commas"
-            :disabled="!switch4"
-          ></v-text-field
-        ></v-col>
+          <v-row>
+            <v-switch class="mx-4" v-model="customAgents" label="Custom User Agents"></v-switch>
+            <v-text-field
+              label="User-Agents"
+              hint="enter multiple with commas"
+              :disabled="!customAgents"
+            ></v-text-field>
+          </v-row>
+          <v-row>
+            <v-switch class="mx-4" v-model="customProxie" label="Custom Proxy"></v-switch>
+            <v-text-field
+              label="proxies"
+              hint="enter multiple with commas"
+              :disabled="!customProxie"
+            ></v-text-field>
+          </v-row>
+        </v-col>
       </v-row>
 
-      <v-btn block large>Run</v-btn>
+      <v-btn block large @click="buildSelection">Run</v-btn>
     </v-form>
   </v-container>
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 export default {
   name: "JobsView",
   data() {
     return {
+      url: "",
       select: null,
-      items: ["Spider 1", "Spider 2", "Spider 3", "Spider 4"],
-      switch1: true,
-      switch2: true,
-      switch3: true,
-      switch4: true,
+      siteMap: false,
+      dynamicJS: false,
+      customProxie: false,
+      customAgents: false,
     };
+  },
+  mounted() {
+    this.$store.dispatch("spiderList");
+  },
+  methods: {
+    buildSelection: () => {
+      let s = this.ss;
+      console.log(s);
+    },
+  },
+  computed: {
+    ...mapGetters([
+      "getSiteMap",
+      "getDynamicJS",
+      "getcustomProxie",
+      "getCustomAgents",
+      "getSpiderSelection",
+    ]),
   },
 };
 </script>

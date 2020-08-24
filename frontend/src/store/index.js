@@ -14,6 +14,14 @@ export default new Vuex.Store({
     ],
     serverStatus: false,
     databaseStatus: false,
+    jobsRunning: false,
+    spiderSelection: [],
+    siteMap: false,
+    dynamicJS: false,
+    customProxie: false,
+    proxiList: [],
+    customAgents: false,
+    userAgents: "",
   },
 
   getters: {
@@ -26,6 +34,30 @@ export default new Vuex.Store({
     getMenus: (state) => {
       return state.menus;
     },
+    getSpiderSelection: (state) => {
+      return state.spiderSelection;
+    },
+    getJobsRunning: (state) => {
+      return state.jobsRunning;
+    },
+    getSiteMap: (state) => {
+      return state.siteMap;
+    },
+    getDynamicJS: (state) => {
+      return state.dynamicJS;
+    },
+    getcustomProxie: (state) => {
+      return state.customProxie;
+    },
+    getProxiList: (state) => {
+      return state.proxiList;
+    },
+    getCustomAgents: (state) => {
+      return state.customAgents;
+    },
+    getUserAgents: (state) => {
+      return state.userAgents;
+    },
   },
 
   mutations: {
@@ -35,12 +67,18 @@ export default new Vuex.Store({
     setDatabaseStatus: (state, status) => {
       state.databaseStatus = status;
     },
+    setJobsRunning: (state, status) => {
+      state.jobsRunning = status;
+    },
+    setSpiderSelection: (state, list) => {
+      state.spiderSelection = list;
+    },
   },
 
   actions: {
     refServer: async ({ commit }) => {
       await axios
-        .get("http://127.0.0.1:5000/api/v1.0/server")
+        .get("http://127.0.0.1:5000/api/v1/server_status")
         .then((response) => {
           if (response.data == "ok") {
             commit("setServerStatus", true);
@@ -53,7 +91,7 @@ export default new Vuex.Store({
     },
     refDatabase: async ({ commit }) => {
       await axios
-        .get("http://127.0.0.1:5000/api/v1.0/database")
+        .get("http://127.0.0.1:5000/api/v1/database_status")
         .then((response) => {
           if (response.data == "ok") {
             commit("setDatabaseStatus", true);
@@ -64,6 +102,26 @@ export default new Vuex.Store({
           console.log(error);
         });
     },
+    spiderList: async ({ commit }) => {
+      await axios
+        .get("http://127.0.0.1:5000/api/v1/spider")
+        .then((response) => {
+          let _temp = [];
+          for (var k of response.data) {
+            _temp.push(k.name);
+          }
+          commit("setSpiderSelection", _temp);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    startJobs: async ({ commit, state }) => {
+      if (!state.jobsRunning) {
+        // axios call to start the scraper
+      }
+    },
+    stopJobs: async ({ commit }) => {},
   },
   modules: {},
 });

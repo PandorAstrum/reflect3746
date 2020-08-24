@@ -11,6 +11,10 @@ flask-cors = "*"
 scrapy = "*"
 scrapyd = "*"
 scrapyd-client = "*"
+crochet = "*"
+flask-sqlalchemy = "*"
+sqlalchemy-serializer = "*"
+flask-serialize = "*"
 
 [requires]
 python_version = "3.7"

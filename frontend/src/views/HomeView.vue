@@ -28,13 +28,18 @@ export default {
     this.$store.dispatch("refDatabase");
   },
   methods: {
-    ...mapActions(["refServer", "refDatabase"]),
+    ...mapActions(["refServer", "refDatabase", "stopJobs"]),
     gotoLogs() {
       // route to logs
+      this.$router.push("/logs");
+    },
+    gotoJobs() {
+      // rote to jobs
+      this.$router.push("/jobs");
     },
   },
   computed: {
-    ...mapGetters(["getServerStatus", "getDatabaseStatus"]),
+    ...mapGetters(["getServerStatus", "getDatabaseStatus", "getJobsRunning"]),
     cards() {
       let _cards = [
         {
@@ -49,9 +54,18 @@ export default {
         {
           name: "Database",
           status: this.getDatabaseStatus ? "green lighten-1" : "red lighten-1",
-          inner: this.getDatabaseStatus ? "Json Doc" : "Not Connected",
+          inner: this.getDatabaseStatus ? "SQLITE Connected" : "Not Connected",
           header: "STATUS",
           btn: [{ text: "REFRESH", action: this.refDatabase }],
+        },
+        {
+          name: "Running",
+          status: this.getJobsRunning ? "green lighten-1" : "grey lighten-1",
+          inner: this.getJobsRunning ? "" : "None",
+          header: "JOBS",
+          btn: this.getJobsRunning
+            ? [{ text: "STOP", action: this.stopJobs }]
+            : [{ text: "CREATE JOB", action: this.gotoJobs }],
         },
         {
           name: "Logs",
