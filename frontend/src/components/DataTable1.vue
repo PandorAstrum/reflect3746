@@ -13,11 +13,23 @@
       ></v-text-field>
     </v-card-title>
     <v-btn>Load All</v-btn>
-    <v-data-table
-      :headers="headers"
-      :items="results"
-      :search="search"
-    ></v-data-table>
+    <v-data-table :headers="headers" :items="results" :search="search">
+      <template v-slot:item.termsurl="{ item }">
+        <v-chip :color="getColor(item.termsurl)" dark>
+          <a :href="item.termsurl">{{ item.termsurl }}</a>
+        </v-chip>
+      </template>
+      <template v-slot:item.privacyurl="{ item }">
+        <v-chip :color="getColor(item.privacyurl)" dark>
+          <a :href="item.privacyurl">{{ item.privacyurl }}</a>
+        </v-chip>
+      </template>
+      <template v-slot:item.cookieurl="{ item }">
+        <v-chip :color="getColor(item.cookieurl)" dark>
+          <a :href="item.cookieurl">{{ item.cookieurl }}</a>
+        </v-chip>
+      </template>
+    </v-data-table>
   </v-card>
 </template>
 
@@ -41,9 +53,9 @@ export default {
       results: [
         {
           website: "google",
-          termsurl: "https://google.com/terms",
-          privacyurl: "https://google.com/privacy",
-          cookieurl: "https://google.com/cookie",
+          termsurl: "https://policies.google.com/terms?hl=en-BD&fg=1",
+          privacyurl: "https://policies.google.com/privacy?hl=en-BD&fg=1",
+          cookieurl: "N/A",
         },
         {
           website: "facebook",
@@ -53,6 +65,12 @@ export default {
         },
       ],
     };
+  },
+  methods: {
+    getColor(url) {
+      if (url != "N/A") return "green lighten-4";
+      else return "red lighten-4";
+    },
   },
 };
 </script>

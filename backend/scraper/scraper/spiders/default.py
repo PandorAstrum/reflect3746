@@ -1,7 +1,7 @@
-from scrapy import Spider
+import scrapy
 
 
-class DefaultSpider(Spider):
+class DefaultSpider(scrapy.Spider):
     name = 'default'
     allowed_domains = ['google.com']
     start_urls = ['http://google.com/']

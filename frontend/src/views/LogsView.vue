@@ -27,7 +27,7 @@
 
 <script>
 export default {
-  name: "ScraperView",
+  name: "LogsView",
   data() {
     return {
       scraperlist: [{ name: "default", domain: "all" }],

@@ -1,19 +1,16 @@
 <template>
   <v-container fluid>
     <v-row justify="center">
-      <v-col cols="3" v-for="card in status" :key="card.cardfor">
-        <StatusCard
-          :Cardfor="card.cardfor"
-          :Headtext="card.headtext"
-          :Innertext="card.innertext"
-          :Currstatus="card.currstatus"
-        ></StatusCard>
+      <v-col cols="3" v-for="(card, index) in cards" :key="index">
+        <StatusCard :properties="card"></StatusCard>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex";
+import axios from "axios";
 import StatusCard from "../components/StatusCard";
 
 export default {
@@ -23,43 +20,49 @@ export default {
   },
   data() {
     return {
-      status: [
-        {
-          cardfor: "Server",
-          headtext: "STATUS",
-          innertext: "Running on Node: Ariel",
-          currstatus: "green",
-        },
-        {
-          cardfor: "0",
-          headtext: "JOBS",
-          innertext: "Completed",
-          currstatus: "grey",
-        },
-        {
-          cardfor: "0",
-          headtext: "JOBS",
-          innertext: "Running",
-          currstatus: "green",
-        },
-        {
-          cardfor: "0",
-          headtext: "JOBS",
-          innertext: "Pending",
-          currstatus: "yellow",
-        },
-        {
-          cardfor: "0",
-          headtext: "JOBS",
-          innertext: "Error",
-          currstatus: "red",
-        },
-      ],
+      serverStatus: false,
     };
   },
+  created() {
+    this.$store.dispatch("refServer");
+    this.$store.dispatch("refDatabase");
+  },
   methods: {
-    // axios call http://127.0.0.1:6800/daemonstatus.json
-    //return back {"node_name": "Ariel", "status": "ok", "pending": 0, "running": 0, "finished": 0}
+    ...mapActions(["refServer", "refDatabase"]),
+    gotoLogs() {
+      // route to logs
+    },
+  },
+  computed: {
+    ...mapGetters(["getServerStatus", "getDatabaseStatus"]),
+    cards() {
+      let _cards = [
+        {
+          name: "Server",
+          status: this.getServerStatus ? "green lighten-1" : "red lighten-1",
+          inner: this.getServerStatus
+            ? "Running on port 5000"
+            : "Not Connected",
+          header: "STATUS",
+          btn: [{ text: "REFRESH", action: this.refServer }],
+        },
+        {
+          name: "Database",
+          status: this.getDatabaseStatus ? "green lighten-1" : "red lighten-1",
+          inner: this.getDatabaseStatus ? "Json Doc" : "Not Connected",
+          header: "STATUS",
+          btn: [{ text: "REFRESH", action: this.refDatabase }],
+        },
+        {
+          name: "Logs",
+          status: "",
+          inner: "All scraped data and errors",
+          header: "STATUS",
+          btn: [{ text: "GO TO LOGS", action: this.gotoLogs }],
+        },
+      ];
+      return _cards;
+    },
   },
 };
 </script>

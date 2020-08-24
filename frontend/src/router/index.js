@@ -11,17 +11,17 @@ const routes = [
     component: HomeView,
   },
   {
-    path: "/scraper",
-    name: "Scraper",
+    path: "/logs",
+    name: "Logs",
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () =>
-      import(/* webpackChunkName: "about" */ "../views/ScraperView"),
+      import(/* webpackChunkName: "about" */ "../views/LogsView"),
   },
   {
     path: "/jobs",
-    name: "jobs",
+    name: "Jobs",
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
@@ -30,7 +30,7 @@ const routes = [
   },
   {
     path: "/data",
-    name: "data",
+    name: "Data",
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.

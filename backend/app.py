@@ -12,14 +12,28 @@ app.config.from_object(__name__)
 CORS(app, resources={r'/*': {'origins': '*'}})
 
 # sanity check route
-@app.route('/api/v1.0/dashboard', methods=['GET'])
-def dashboard():
-    return jsonify("Dashboard")
+@app.route('/api/v1.0/server', methods=['GET'])
+def server_stat():
+    """
+    ping flask if it is active
+    :return: json ok
+    """
+    return jsonify("ok")
+
+
+@app.route('/api/v1.0/database', methods=['GET'])
+def database_stat():
+    """
+    try to connect on json server
+    :return: ok on connected not okay on error
+    """
+    return jsonify("not okay")
 
 
 @app.route('/api/v1.0/scraper', methods=['GET'])
 def scraper():
     # get scrapper list
+
     # Create new scrapper
     return jsonify('scraper! List')
 
