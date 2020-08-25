@@ -1,33 +1,20 @@
 <template>
   <v-card>
-    <v-select v-model="select" :items="items" label="Select"></v-select>
     <v-card-title>
-      Results
-      <v-spacer></v-spacer>
-      <v-text-field
-        v-model="search"
-        append-icon="mdi-magnify"
-        label="Search"
-        single-line
-        hide-details
-      ></v-text-field>
+      <v-btn block dark @click="loadall">Load All</v-btn>
+      <v-spacer></v-spacer>Results
     </v-card-title>
-    <v-btn>Load All</v-btn>
-    <v-data-table :headers="headers" :items="results" :search="search">
-      <template v-slot:item.termsurl="{ item }">
-        <v-chip :color="getColor(item.termsurl)" dark>
-          <a :href="item.termsurl">{{ item.termsurl }}</a>
-        </v-chip>
-      </template>
-      <template v-slot:item.privacyurl="{ item }">
-        <v-chip :color="getColor(item.privacyurl)" dark>
-          <a :href="item.privacyurl">{{ item.privacyurl }}</a>
-        </v-chip>
-      </template>
-      <template v-slot:item.cookieurl="{ item }">
-        <v-chip :color="getColor(item.cookieurl)" dark>
-          <a :href="item.cookieurl">{{ item.cookieurl }}</a>
-        </v-chip>
+
+    <v-data-table
+      :headers="headers"
+      :items="results"
+      item-key="name"
+      sort-by="name"
+      group-by="website"
+      class="elevation-1"
+    >
+      <template v-slot:item.name="{ item }">
+        <a :href="item.name">{{ item.name }}</a>
       </template>
     </v-data-table>
   </v-card>
@@ -38,38 +25,40 @@ export default {
   name: "DataTable1",
   data() {
     return {
-      search: "",
       headers: [
         {
-          text: "Website",
+          text: "Scrapped Data",
           align: "start",
-          sortable: false,
-          value: "website",
+          value: "name",
+          groupable: false,
         },
-        { text: "Terms", value: "termsurl" },
-        { text: "Privacy", value: "privacyurl" },
-        { text: "Cookie", value: "cookieurl" },
+        { text: "Website", value: "website", align: "right" },
+        { text: "Category", value: "category", align: "right" },
       ],
       results: [
         {
-          website: "google",
-          termsurl: "https://policies.google.com/terms?hl=en-BD&fg=1",
-          privacyurl: "https://policies.google.com/privacy?hl=en-BD&fg=1",
-          cookieurl: "N/A",
+          name: "https://legal3.com",
+          website: "unity3d.com",
+          category: "terms",
         },
         {
-          website: "facebook",
-          termsurl: "https://www.facebook.com/legal/terms",
-          privacyurl: "https://www.facebook.com/privacy/explanation",
-          cookieurl: "https://www.facebook.com/policies/cookies/",
+          name: "https://legal.com",
+          website: "unity3d.com",
+          category: "privacy",
+        },
+        {
+          name: "https://legal2.com",
+          website: "unity3d.com",
+          category: "policy",
         },
       ],
+
+      search: "",
     };
   },
   methods: {
-    getColor(url) {
-      if (url != "N/A") return "green lighten-4";
-      else return "red lighten-4";
+    loadall() {
+      console.log("load all scrapped item from database");
     },
   },
 };

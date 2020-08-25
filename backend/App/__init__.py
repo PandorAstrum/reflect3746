@@ -11,33 +11,45 @@ __date__ = 8/25/2020
 __desc__ = "Description about this file and what it does"
 """
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
-# create the database object
+from bson.json_util import dumps, loads
 from scraper.scraper import Scraper
+from config import DevelopmentConfig
 
-db = SQLAlchemy()
+# create the database object
+
+
+# scraper object
+scraper = Scraper()
 
 
 # this function is the application factory
 def create_app():
     app = Flask(__name__)
-    app.config.from_object('config')
+    app.config.from_object(DevelopmentConfig())
+    CORS(app, resources={r'/*': {'origins': '*'}})
 
-    db.init_app(app)
-    with app.app_context():
-        CORS(app, resources={r'/*': {'origins': '*'}})          # enable CORS
+    from App import db
+    from .routes import api
+    app.register_blueprint(api, url_prefix='/api/v1')  # blueprints for api
+    _spiders = scraper.get_all_spiders()
 
-        db.create_all(app=app)                                  # create tables only once
+    if len(_spiders) > 0:
+        _spider_col = loads(dumps(db.spider_collection.find()))
+        new_spider = [s for s in _spiders if not any(_s['name'] in s for _s in _spider_col)]
+        if len(new_spider) > 0:
+            for n in new_spider:
+                db.spider_collection.insert_one({"name": n})
 
-        from .routes import api
-        app.register_blueprint(api, url_prefix='/api/v1')  # blueprints for api
-        scraper = Scraper()
-        print(scraper.get_all_spiders())
-        # get list of spider from scrapy
-        # commit to database with their name
-        return app
+    return app
+
+
+
+
+
+
+
 
 
 

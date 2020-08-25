@@ -10,8 +10,10 @@ __copyright__ = "Copyright 2020, PandorAstrum"
 __date__ = 8/25/2020
 __desc__ = "Run the flask app"
 """
-from . import create_app
+from App import create_app
 
 if __name__ == "__main__":
+
     app = create_app()
+
     app.run()

@@ -10,9 +10,10 @@ __copyright__ = "Copyright 2019, PandorAstrum"
 __date__ = 8/25/2020
 __desc__ = "Description about this file and what it does"
 """
+from flask import current_app
 from flask import Blueprint, jsonify, make_response, request
-from .models import Spider
-from . import db
+from App import db
+from bson.json_util import dumps
 
 api = Blueprint('api', __name__, template_folder='templates')
 
@@ -20,36 +21,38 @@ api = Blueprint('api', __name__, template_folder='templates')
 @api.route('/server_status', methods=["GET"])
 def server_status():
     """Ping Server to check if it is running"""
-    return jsonify("ok")
+    return jsonify({'host': request.host, 'status': 200})
 
 
 @api.route('/database_status', methods=["GET"])
 def database_status():
     """Check if database table exist and connection established"""
     try:
+        _col = db.spider_collection.find()
         # connect database path
         # check database connection
         # check database table
         pass
     except:
         pass
-    return jsonify("not okay")
+    return dumps(_col)
 
 
 @api.route('/spider', methods=["GET", "POST"])
 def spider():
     """Query Spider or Create one"""
-    if request.method == "POST":
-        """Create a spider via query string parameters."""
-        name = request.args.get('name')
-        new_spider = ''
-        if name:
-            new_spider = Spider(name=name)
-            db.session.add(new_spider)  # Adds new User record to database
-            db.session.commit()  # Commits all changes
-        return Spider.get_delete_put_post(new_spider)
-    else:
-        return Spider.get_delete_put_post()
+    # if request.method == "POST":
+    #     """Create a spider via query string parameters."""
+    #     name = request.args.get('name')
+    #     new_spider = ''
+    #     if name:
+    #         new_spider = Spider(name=name)
+    #         # db.session.add(new_spider)  # Adds new User record to database
+    #         # db.session.commit()  # Commits all changes
+    #     return Spider.get_delete_put_post(new_spider)
+    # else:
+    #     return Spider.get_delete_put_post()
+    pass
 
 
 @api.route('/run', methods=["POST"])

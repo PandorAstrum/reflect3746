@@ -39,14 +39,19 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["getServerStatus", "getDatabaseStatus", "getJobsRunning"]),
+    ...mapGetters([
+      "getServerStatus",
+      "getDatabaseStatus",
+      "getServerHost",
+      "getJobsRunning",
+    ]),
     cards() {
       let _cards = [
         {
           name: "Server",
           status: this.getServerStatus ? "green lighten-1" : "red lighten-1",
           inner: this.getServerStatus
-            ? "Running on port 5000"
+            ? `Running on port ${this.getServerHost}`
             : "Not Connected",
           header: "STATUS",
           btn: [{ text: "REFRESH", action: this.refServer }],

@@ -9,12 +9,11 @@ verify_ssl = true
 flask = "*"
 flask-cors = "*"
 scrapy = "*"
-scrapyd = "*"
-scrapyd-client = "*"
 crochet = "*"
-flask-sqlalchemy = "*"
 sqlalchemy-serializer = "*"
 flask-serialize = "*"
+flask-pymongo = "*"
+dnspython = "*"
 
 [requires]
 python_version = "3.7"

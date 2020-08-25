@@ -10,7 +10,7 @@
 BOT_NAME = 'PolicyBot'
 
 SPIDER_MODULES = ['scraper.scraper.spiders']
-NEWSPIDER_MODULE = 'scraper.scraper.spiders'
+NEWSPIDER_MODULE = 'scraper.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
