@@ -95,7 +95,8 @@ def spider_run():
         spider_settings = params["spider_settings"]
         domain = spider_kwargs['baseurl'].split("//")[-1].split("/")[0].split('?')[0]
         if db.scraped_col.count_documents({'domain': domain}, limit=1) != 0:   # if already exist
-            pass # pull data and return jsonify
+            existed_content = [loads(dumps(db.scraped_col.find_one({'domain': domain})))]
+            return db.json_encoder.encode(existed_content)
         else:
             global scrape_in_progress
             global scrape_complete
@@ -143,11 +144,17 @@ def get_results_for(result_id):
     Get the results of a single item
     """
     if db.mongoatlas.client is not None:
-        returned_obj = loads(dumps(db.scraped_col.find_one({"_id": ObjectId(result_id)})))
+        returned_obj = [loads(dumps(db.scraped_col.find_one({"_id": ObjectId(result_id)})))]
+
         return db.json_encoder.encode(returned_obj)
 
 
-    return jsonify({"id": result_id})
+@api.route('/all', methods=["GET"])
+def all_results():
+    """fetch all results from database"""
+    if db.mongoatlas.client is not None:
+        returned_obj = loads(dumps(db.scraped_col.find()))
+        return db.json_encoder.encode(returned_obj)
 
 
 @api.route('/logs', methods=["GET"])
@@ -159,7 +166,6 @@ def get_logs():
         all_logs = loads(dumps(db.logs_col.find()))
         return db.json_encoder.encode(all_logs)
     return jsonify({"status": 200, "error": "Cant do it"})
-
 
 
 # NECESSARY METHODS TO CALL =====================================================================

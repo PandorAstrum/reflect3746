@@ -36,20 +36,6 @@ export default {
           groupable: false,
         },
       ],
-      // results: [
-      //   {
-      //     results: "https://legal3.com",
-      //     website: "unity3d.com",
-      //   },
-      //   {
-      //     results: "https://legal.com",
-      //     website: "unity3d.com",
-      //   },
-      //   {
-      //     results: "https://legal2.com",
-      //     website: "unity3d.com",
-      //   },
-      // ],
     };
   },
   mounted() {
@@ -57,23 +43,25 @@ export default {
   },
   methods: {
     loadall() {
-      console.log("load all scrapped item from database");
+      this.$store.dispatch("fetchAllResults");
     },
   },
   computed: {
-    ...mapGetters(["getInProgress", "getResultObj"]),
+    ...mapGetters(["getInProgress", "getResultList"]),
     results() {
-      let _r = this.getResultObj;
+      let _r = this.getResultList;
 
-      if (_r != null) {
-        let _results = _r.results.urls;
-        let _domain = _r.domain;
+      if (_r != null && _r.length > 0) {
         let _final = [];
-        for (var i in _results) {
-          let _obj = {};
-          _obj["website"] = _domain;
-          _obj["results"] = _results[i];
-          _final.push(_obj);
+        for (var i in _r) {
+          let _results = _r[i].results.urls;
+          let _domain = _r[i].domain;
+          for (var _u in _results) {
+            let _obj = {};
+            _obj["website"] = _domain;
+            _obj["results"] = _results[_u];
+            _final.push(_obj);
+          }
         }
         return _final;
       }

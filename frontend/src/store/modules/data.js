@@ -1,11 +1,11 @@
 import axios from "axios";
 
 let state = {
-  resultObj: null,
+  resultList: null,
 };
 let mutations = {
-  setResultObj: (state, obj) => {
-    state.resultObj = obj;
+  setResultList: (state, _list) => {
+    state.resultList = _list;
   },
 };
 
@@ -16,17 +16,27 @@ let actions = {
       await axios
         .get(`http://127.0.0.1:5000/api/v1/results/${rootState.logs.resultsID}`)
         .then((response) => {
-          commit("setResultObj", response.data);
+          commit("setResultList", response.data);
         })
         .catch((error) => {
           console.log(error);
         });
     }
   },
+  fetchAllResults: async ({ commit }) => {
+    await axios
+      .get(`http://127.0.0.1:5000/api/v1/all`)
+      .then((response) => {
+        commit("setResultList", response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  },
 };
 let getters = {
-  getResultObj: (state) => {
-    return state.resultObj;
+  getResultList: (state) => {
+    return state.resultList;
   },
 };
 
