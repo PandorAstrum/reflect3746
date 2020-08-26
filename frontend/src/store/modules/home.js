@@ -4,7 +4,7 @@ let state = {
   serverStatus: false,
   serverHost: "",
   databaseStatus: false,
-  jobsRunning: false,
+  databaseObj: null,
 };
 let mutations = {
   setServerStatus: (state, status) => {
@@ -16,8 +16,8 @@ let mutations = {
   setServerHost: (state, t) => {
     state.serverHost = t;
   },
-  setJobsRunning: (state, status) => {
-    state.jobsRunning = status;
+  setDatabaseObj: (state, obj) => {
+    state.databaseObj = obj;
   },
 };
 
@@ -40,8 +40,12 @@ let actions = {
     await axios
       .get("http://127.0.0.1:5000/api/v1/database_status")
       .then((response) => {
-        if (response.data == "ok") {
+        if (response.data.error == null) {
           commit("setDatabaseStatus", true);
+          commit("setDatabaseObj", response.data);
+        } else {
+          commit("setDatabaseStatus", false);
+          commit("setDatabaseObj", response.data);
         }
       })
       .catch((error) => {
@@ -60,8 +64,8 @@ let getters = {
   getDatabaseStatus: (state) => {
     return state.databaseStatus;
   },
-  getJobsRunning: (state) => {
-    return state.jobsRunning;
+  getDatabaseObj: (state) => {
+    return state.databaseObj;
   },
 };
 

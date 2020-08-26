@@ -8,7 +8,4 @@ import scrapy
 
 class ScraperItem(scrapy.Item):
     # define the fields for your item here like:
-    Website = scrapy.Field()
-    Privacy_url = scrapy.Field()
-    Terms_url = scrapy.Field()
-    Cookie_url = scrapy.Field()
+    urls = scrapy.Field()

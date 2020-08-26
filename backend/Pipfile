@@ -7,13 +7,11 @@ verify_ssl = true
 
 [packages]
 flask = "*"
+dnspython = "*"
 flask-cors = "*"
+flask-pymongo = "*"
 scrapy = "*"
 crochet = "*"
-sqlalchemy-serializer = "*"
-flask-serialize = "*"
-flask-pymongo = "*"
-dnspython = "*"
 
 [requires]
 python_version = "3.7"

@@ -30,20 +30,19 @@ export default {
   methods: {
     ...mapActions(["refServer", "refDatabase", "stopJobs"]),
     gotoLogs() {
-      // route to logs
-      this.$router.push("/logs");
+      this.$router.push("/logs"); // route to logs
     },
     gotoJobs() {
-      // rote to jobs
-      this.$router.push("/jobs");
+      this.$router.push("/jobs"); // rote to jobs
     },
   },
   computed: {
     ...mapGetters([
       "getServerStatus",
-      "getDatabaseStatus",
       "getServerHost",
-      "getJobsRunning",
+      "getDatabaseStatus",
+      "getDatabaseObj",
+      "getInProgress",
     ]),
     cards() {
       let _cards = [
@@ -59,17 +58,19 @@ export default {
         {
           name: "Database",
           status: this.getDatabaseStatus ? "green lighten-1" : "red lighten-1",
-          inner: this.getDatabaseStatus ? "SQLITE Connected" : "Not Connected",
+          inner: this.getDatabaseStatus
+            ? `${this.getDatabaseObj.nodes}`
+            : "Not Connected",
           header: "STATUS",
           btn: [{ text: "REFRESH", action: this.refDatabase }],
         },
         {
           name: "Running",
-          status: this.getJobsRunning ? "green lighten-1" : "grey lighten-1",
-          inner: this.getJobsRunning ? "" : "None",
+          status: this.getInProgress ? "green lighten-1" : "grey lighten-1",
+          inner: this.getInProgress ? "In Progress" : "None",
           header: "JOBS",
-          btn: this.getJobsRunning
-            ? [{ text: "STOP", action: this.stopJobs }]
+          btn: this.getInProgress
+            ? [{}]
             : [{ text: "CREATE JOB", action: this.gotoJobs }],
         },
         {

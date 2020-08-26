@@ -1,12 +1,19 @@
 <template>
   <v-container>
-    <v-form>
+    <form>
       <v-row>
         <v-col cols="1" class="mx-auto my-auto">
           <v-subheader>WEBSITE</v-subheader>
         </v-col>
         <v-col cols="11">
-          <v-text-field v-model="url" :counter="10" label="URL" required></v-text-field>
+          <v-text-field
+            v-model="website"
+            :error-messages="websiteErrors"
+            label="URL"
+            required
+            @input="$v.website.$touch()"
+            @blur="$v.website.$touch()"
+          ></v-text-field>
         </v-col>
       </v-row>
       <v-row>
@@ -17,9 +24,11 @@
           <v-select
             v-model="select"
             :items="getSpiderSelection"
-            :rules="[(v) => !!v || 'Please Select a spider or create new']"
+            :error-messages="selectErrors"
             label="Select"
             required
+            @change="$v.select.$touch()"
+            @blur="$v.select.$touch()"
           ></v-select>
         </v-col>
       </v-row>
@@ -30,15 +39,10 @@
         <v-col cols="11">
           <v-row>
             <v-switch class="mx-4" v-model="siteMap" label="Sitemap (If exist)"></v-switch>
-            <v-switch class="mx-4" v-model="dynamicJS" label="DynamicJS"></v-switch>
           </v-row>
           <v-row>
-            <v-switch class="mx-4" v-model="customAgents" label="Custom User Agents"></v-switch>
-            <v-text-field
-              label="User-Agents"
-              hint="enter multiple with commas"
-              :disabled="!customAgents"
-            ></v-text-field>
+            <v-switch class="mx-4" v-model="downloadDelay" label="Delay"></v-switch>
+            <v-text-field v-model="delay" hint="enter seconds" :disabled="!downloadDelay"></v-text-field>
           </v-row>
           <v-row>
             <v-switch class="mx-4" v-model="customProxie" label="Custom Proxy"></v-switch>
@@ -50,43 +54,79 @@
           </v-row>
         </v-col>
       </v-row>
-
-      <v-btn block large @click="buildSelection">Run</v-btn>
-    </v-form>
+      <v-btn
+        block
+        large
+        color="secondary"
+        :loading="getInProgress"
+        :disabled="getInProgress"
+        @click="runSpider"
+      >Run</v-btn>
+    </form>
   </v-container>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
+import { validationMixin } from "vuelidate";
+import { required, url } from "vuelidate/lib/validators";
 export default {
   name: "JobsView",
+  mixins: [validationMixin],
+  validations: {
+    website: { required, url },
+    select: { required },
+  },
   data() {
     return {
-      url: "",
+      website: "",
       select: null,
       siteMap: false,
-      dynamicJS: false,
+      downloadDelay: false,
+      delay: 1,
       customProxie: false,
-      customAgents: false,
     };
   },
   mounted() {
     this.$store.dispatch("spiderList");
   },
   methods: {
-    buildSelection: () => {
-      let s = this.ss;
-      console.log(s);
+    runSpider() {
+      this.$v.$touch();
+      if (this.$v.$invalid) {
+      } else {
+        // build form data
+        let params = {
+          spider_kwargs: {
+            baseurl: this.website,
+            spider_name: this.select,
+          },
+          spider_settings: {
+            sitemap: this.siteMap,
+            delay: this.delay,
+          },
+        };
+        this.$store.dispatch("runSpider", params); // call actions pass obj as param
+        this.$router.push("/data");
+      }
     },
   },
   computed: {
-    ...mapGetters([
-      "getSiteMap",
-      "getDynamicJS",
-      "getcustomProxie",
-      "getCustomAgents",
-      "getSpiderSelection",
-    ]),
+    ...mapGetters(["getSpiderSelection", "getInProgress"]),
+    selectErrors() {
+      const errors = [];
+      if (!this.$v.select.$dirty) return errors;
+      !this.$v.select.required && errors.push("Please select a spider");
+      return errors;
+    },
+    websiteErrors() {
+      const errors = [];
+      if (!this.$v.website.$dirty) return errors;
+      !this.$v.website.url &&
+        errors.push("Not a valid url (e.g: https://example.com)");
+      !this.$v.website.required && errors.push("Please provide an url");
+      return errors;
+    },
   },
 };
 </script>
