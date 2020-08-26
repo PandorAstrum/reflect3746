@@ -21,6 +21,7 @@ import json
 
 from flask import Blueprint, jsonify, make_response, request
 from bson.json_util import dumps, loads
+from bson.objectid import ObjectId
 from scrapy import spiderloader
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.project import get_project_settings
@@ -93,13 +94,14 @@ def spider_run():
         _selected_spider = spider_kwargs['spider_name']
         spider_settings = params["spider_settings"]
         domain = spider_kwargs['baseurl'].split("//")[-1].split("/")[0].split('?')[0]
-        if db.scraped_col.count_documents({'name': domain}, limit=1) != 0:   # if already exist
+        if db.scraped_col.count_documents({'domain': domain}, limit=1) != 0:   # if already exist
             pass # pull data and return jsonify
-            return url_for('get_results_of', _id='_id')
         else:
             global scrape_in_progress
             global scrape_complete
+            global urls_list
             if not scrape_in_progress:
+                urls_list = []
                 scrape_in_progress = True
                 # build params for spider
                 _spider_kwargs = {
@@ -127,9 +129,25 @@ def get_results():
     Get the results only if a spider has results
     """
     global scrape_complete
+    global scrape_in_progress
     if scrape_complete:
         return json.dumps(urls_list)
-    return 'Scrape Still Progress'
+    if scrape_in_progress:
+        return 'Scrape Still Progress'
+    return "Scrape Not Started"
+
+
+@api.route('/results/<result_id>', methods=["GET"])
+def get_results_for(result_id):
+    """
+    Get the results of a single item
+    """
+    if db.mongoatlas.client is not None:
+        returned_obj = loads(dumps(db.scraped_col.find_one({"_id": ObjectId(result_id)})))
+        return db.json_encoder.encode(returned_obj)
+
+
+    return jsonify({"id": result_id})
 
 
 @api.route('/logs', methods=["GET"])
@@ -137,15 +155,11 @@ def get_logs():
     """
     Get history of scraping from database
     """
-    return 'logs'
+    if db.mongoatlas.client is not None:
+        all_logs = loads(dumps(db.logs_col.find()))
+        return db.json_encoder.encode(all_logs)
+    return jsonify({"status": 200, "error": "Cant do it"})
 
-
-@api.route('/results/<_id>', methods=["GET"])
-def get_results_of(_id):
-    """
-    Get a single results
-    """
-    return 'get single results'
 
 
 # NECESSARY METHODS TO CALL =====================================================================
@@ -170,24 +184,29 @@ def finished_scrape(null):
     scrape_in_progress = False
 
     _urls = {k: [d.get(k) for d in urls_list] for k in set().union(*urls_list)}
-    _u = []
-    for u in urls_list:
-        v = u["urls"]
-
     print(_urls)
+    print(domain)
     #build data to dump
     scraped = {
         "domain": domain,
-        "urls": _urls,
+        "results": _urls,
     }
+    returned_id = db.scraped_col.insert_one(scraped)
     logs = {
         "spidername": _selected_spider,
-        'timestamp': datetime.utcnow()
+        "domain": domain,
+        'timestamp': datetime.now(),
+        "job_id": returned_id.inserted_id
     }
+    returned_id_2 = db.logs_col.insert_one(logs)
 
+    print(scraped)
+    print(logs)
     # dump to mongo db
 
     # call url route to results
+    print(returned_id)
+    print(returned_id.inserted_id)
 
 
 

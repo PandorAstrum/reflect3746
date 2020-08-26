@@ -4,6 +4,8 @@ import axios from "axios";
 
 import home from "./modules/home";
 import jobs from "./modules/jobs";
+import logs from "./modules/logs";
+import data from "./modules/data";
 
 Vue.use(Vuex);
 
@@ -58,5 +60,7 @@ export default new Vuex.Store({
   modules: {
     home,
     jobs,
+    logs,
+    data,
   },
 });

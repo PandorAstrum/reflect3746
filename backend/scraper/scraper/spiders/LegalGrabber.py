@@ -30,7 +30,7 @@ class LegalGrabberSpider(CrawlSpider):
         self._rules = [Rule
                        (LinkExtractor
                         (allow_domains=self._kwargs['domain'],
-                         restrict_text=["Terms", "Legal", "Privacy", "Cookies"]
+                         restrict_text=["Terms", "Legal", "Privacy", "Cookies", "tos", "privacypolicy"]
                          ),
                         callback=self.parse_link,
                         follow=True)
