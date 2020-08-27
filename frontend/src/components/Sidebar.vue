@@ -39,9 +39,6 @@ export default {
       mini: true,
     };
   },
-  // mounted: {
-  //   this.menu = getMenus;
-  // },
   computed: {
     ...mapGetters(["getMenus"]),
   },

@@ -10,21 +10,14 @@ __copyright__ = "Copyright 2020, PandorAstrum"
 __date__ = 8/25/2020
 __desc__ = "API routes"
 """
-import json
-import time
-from datetime import datetime
-
-from flask import redirect, url_for
-
 import crochet
 import json
+from datetime import datetime
 
-from flask import Blueprint, jsonify, make_response, request
+from flask import Blueprint, jsonify, request
 from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
-from scrapy import spiderloader
 from scrapy.crawler import CrawlerRunner
-from scrapy.utils.project import get_project_settings
 
 from App import db
 from scraper.scraper import Scraper
@@ -57,6 +50,7 @@ def database_status():
         username = db.mongoatlas.username
         nodes = db.mongoatlas.node_list[0]
         return jsonify({
+            "status": 200,
             "database": db_name,
             "nodes": nodes,
             "username": username
@@ -65,6 +59,7 @@ def database_status():
 
         error_message = db.mongoatlas.error
         return jsonify({
+            "Status": 404,
             "error": error_message
         })
 
@@ -132,10 +127,10 @@ def get_results():
     global scrape_complete
     global scrape_in_progress
     if scrape_complete:
-        return json.dumps(urls_list)
+        return jsonify({"Status": 200, "msg": "Scraping in progress", "records": json.dumps(urls_list)})
     if scrape_in_progress:
-        return 'Scrape Still Progress'
-    return "Scrape Not Started"
+        return jsonify({"Status": 102, "msg": "Scraping in progress"})
+    return jsonify({"Status": 404, "msg": "Scraping Not Started"})
 
 
 @api.route('/results/<result_id>', methods=["GET"])

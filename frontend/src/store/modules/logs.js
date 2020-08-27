@@ -2,7 +2,7 @@ import axios from "axios";
 
 let state = {
   logList: [],
-  resultsID: null,
+  resultsID: "",
 };
 let mutations = {
   setLogList: (state, _list) => {
@@ -14,15 +14,17 @@ let mutations = {
 };
 
 let actions = {
-  fetchAllLogs: async ({ commit }) => {
-    await axios
-      .get("http://127.0.0.1:5000/api/v1/logs")
-      .then((response) => {
-        commit("setLogList", response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  fetchAllLogs: async ({ commit, state }) => {
+    if (!state.logList.length || !!state.logList) {
+      await axios
+        .get("http://127.0.0.1:5000/api/v1/logs")
+        .then((response) => {
+          commit("setLogList", response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   },
 };
 let getters = {

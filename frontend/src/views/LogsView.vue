@@ -21,7 +21,7 @@
                 <a href="#" @click.prevent="callData($event, item.job_id)">{{ item.job_id }}</a>
               </td>
               <td>{{ item.spidername }}</td>
-              <td>{{ item.timestamp | dateFormater }}</td>
+              <td>{{ item.timestamp | !!item ? '': dateFormater }}</td>
             </tr>
           </tbody>
         </template>
@@ -34,12 +34,7 @@
 import { mapGetters, mapActions } from "vuex";
 export default {
   name: "LogsView",
-  data() {
-    return {
-      scraperlist: [{ name: "default", domain: "all" }],
-    };
-  },
-  created() {
+  mounted() {
     this.$store.dispatch("fetchAllLogs");
   },
   computed: {

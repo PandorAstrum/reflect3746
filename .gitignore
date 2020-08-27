@@ -2,7 +2,9 @@
 *.idea
 
 # dir
-*__pycache__
+*/__pycache__
+*/*.py[cod]
+*/*$py.class
 frontend/.DS_Store
 frontend/node_modules
 frontend/dist
@@ -10,6 +12,41 @@ frontend/dist
 # local env files
 .env.local
 .env.*.local
+
+### Python template
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
 
 # Log files
 npm-debug.log*

@@ -16,11 +16,10 @@
 
     <v-card-actions>
       <v-btn
-        v-for="(btn, index) in properties.btn"
-        :key="index"
+        v-if="!!properties.btn"
         text
-        @click="btn.action"
-      >{{ btn.text }}</v-btn>
+        @click="!!properties.btn ? properties.btn.action: empty"
+      >{{ properties.btn.text }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -29,6 +28,9 @@
 export default {
   name: "StatusCard",
   props: ["properties"],
+  methods: {
+    empty() {},
+  },
 };
 </script>
 

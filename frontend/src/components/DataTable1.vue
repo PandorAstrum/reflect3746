@@ -50,9 +50,8 @@ export default {
     ...mapGetters(["getInProgress", "getResultList"]),
     results() {
       let _r = this.getResultList;
-
-      if (_r != null && _r.length > 0) {
-        let _final = [];
+      let _final = [];
+      if (!!_r || !_r.length) {
         for (var i in _r) {
           let _results = _r[i].results.urls;
           let _domain = _r[i].domain;

@@ -23,7 +23,7 @@ export default {
       serverStatus: false,
     };
   },
-  created() {
+  mounted() {
     this.$store.dispatch("refServer");
     this.$store.dispatch("refDatabase");
   },
@@ -53,7 +53,7 @@ export default {
             ? `Running on port ${this.getServerHost}`
             : "Not Connected",
           header: "STATUS",
-          btn: [{ text: "REFRESH", action: this.refServer }],
+          btn: { text: "REFRESH", action: this.refServer },
         },
         {
           name: "Database",
@@ -62,7 +62,7 @@ export default {
             ? `${this.getDatabaseObj.nodes}`
             : "Not Connected",
           header: "STATUS",
-          btn: [{ text: "REFRESH", action: this.refDatabase }],
+          btn: { text: "REFRESH", action: this.refDatabase },
         },
         {
           name: "Running",
@@ -70,15 +70,15 @@ export default {
           inner: this.getInProgress ? "In Progress" : "None",
           header: "JOBS",
           btn: this.getInProgress
-            ? [{}]
-            : [{ text: "CREATE JOB", action: this.gotoJobs }],
+            ? {}
+            : { text: "CREATE JOB", action: this.gotoJobs },
         },
         {
           name: "Logs",
           status: "",
           inner: "All scraped data and errors",
           header: "STATUS",
-          btn: [{ text: "GO TO LOGS", action: this.gotoLogs }],
+          btn: { text: "GO TO LOGS", action: this.gotoLogs },
         },
       ];
       return _cards;

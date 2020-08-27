@@ -4,7 +4,7 @@ let state = {
   serverStatus: false,
   serverHost: "",
   databaseStatus: false,
-  databaseObj: null,
+  databaseObj: {},
 };
 let mutations = {
   setServerStatus: (state, status) => {
@@ -22,36 +22,40 @@ let mutations = {
 };
 
 let actions = {
-  refServer: async ({ commit }) => {
-    await axios
-      .get("http://127.0.0.1:5000/api/v1/server_status")
-      .then((response) => {
-        if (response.data.status == 200) {
-          commit("setServerStatus", true);
-          commit("setServerHost", response.data.host);
-        }
-      })
-      .catch((error) => {
-        commit("setServerStatus", false);
-        console.log(error);
-      });
+  refServer: async ({ commit, state }) => {
+    if (!!state.serverHost || !state.serverHost.length) {
+      await axios
+        .get("http://127.0.0.1:5000/api/v1/server_status")
+        .then((response) => {
+          if (response.data.status == 200) {
+            commit("setServerStatus", true);
+            commit("setServerHost", response.data.host);
+          }
+        })
+        .catch((error) => {
+          commit("setServerStatus", false);
+          console.log(error);
+        });
+    }
   },
-  refDatabase: async ({ commit }) => {
-    await axios
-      .get("http://127.0.0.1:5000/api/v1/database_status")
-      .then((response) => {
-        if (response.data.error == null) {
-          commit("setDatabaseStatus", true);
-          commit("setDatabaseObj", response.data);
-        } else {
+  refDatabase: async ({ commit, state }) => {
+    if (!!state.databaseObj) {
+      await axios
+        .get("http://127.0.0.1:5000/api/v1/database_status")
+        .then((response) => {
+          if (response.data.Status == 200) {
+            commit("setDatabaseStatus", true);
+            commit("setDatabaseObj", response.data);
+          } else {
+            commit("setDatabaseStatus", false);
+            commit("setDatabaseObj", {});
+          }
+        })
+        .catch((error) => {
           commit("setDatabaseStatus", false);
-          commit("setDatabaseObj", response.data);
-        }
-      })
-      .catch((error) => {
-        commit("setDatabaseStatus", false);
-        console.log(error);
-      });
+          console.log(error);
+        });
+    }
   },
 };
 let getters = {
