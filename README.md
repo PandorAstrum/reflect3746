@@ -65,7 +65,7 @@ N.B: In `backend/db.py` file change `CONNECTION_STRING` to your own mongodb data
 
     Navigate to `localhost:5000` on your browser to use the Dashboard
 
-_For pai endpoint see below_
+_For api endpoint see below_
 
 ## Folder Structure
 
@@ -92,9 +92,9 @@ _project root_
         ├── public
         └── src
 
-## API Eendpoints
+## API Endpoints
 
-`http://127.0.0.1:5000/api/v1` enpoints after this
+`http://127.0.0.1:5000/api/v1` endpoints after this
 
 ---
 
