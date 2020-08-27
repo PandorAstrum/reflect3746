@@ -7,9 +7,10 @@ __email__ = "dreadlordn@gmail.com"
 __status__ = "Production"
 __license__ = "GPL-3"
 __copyright__ = "Copyright 2020, PandorAstrum"
-__date__ = 8/25/2020
-__desc__ = "Run the flask app"
+__date__ = 8/26/2020
+__desc__ = "Flask server runner"
 """
+
 from App import create_app
 
 if __name__ == "__main__":

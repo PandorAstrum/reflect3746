@@ -190,8 +190,6 @@ def finished_scrape(null):
     scrape_in_progress = False
 
     _urls = {k: [d.get(k) for d in urls_list] for k in set().union(*urls_list)}
-    print(_urls)
-    print(domain)
     #build data to dump
     scraped = {
         "domain": domain,
@@ -205,14 +203,6 @@ def finished_scrape(null):
         "job_id": returned_id.inserted_id
     }
     returned_id_2 = db.logs_col.insert_one(logs)
-
-    print(scraped)
-    print(logs)
-    # dump to mongo db
-
-    # call url route to results
-    print(returned_id)
-    print(returned_id.inserted_id)
 
 
 

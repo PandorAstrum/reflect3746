@@ -29,8 +29,8 @@ class LegalGrabberSpider(CrawlSpider):
         self.header = random.choice(self.headers_pool)
         self._rules = [Rule
                        (LinkExtractor
-                        (allow_domains=self._kwargs['domain'],
-                         restrict_text=["Terms", "Legal", "Privacy", "Cookies", "tos", "privacypolicy"]
+                        (allow_domains=[self._kwargs['domain']],
+                         restrict_text=["Terms", "Legal", "Privacy", "Cookies", "tos", "privacypolicy", "terms", "policy"]
                          ),
                         callback=self.parse_link,
                         follow=True)
