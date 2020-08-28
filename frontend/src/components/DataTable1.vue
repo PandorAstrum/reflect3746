@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title>
-      <v-btn block color="secondary" @click="loadall">Load All</v-btn>
+      <v-btn block color="secondary" @click="loadall" :disabled="getInProgress">Load All</v-btn>
       <v-spacer></v-spacer>
     </v-card-title>
 
@@ -13,7 +13,7 @@
       group-by="website"
       class="elevation-1"
       :loading="getInProgress"
-      loading-text="Loading... Please wait"
+      loading-text="Scraping... Please wait"
     >
       <template v-slot:item.results="{ item }">
         <a :href="item.results">{{ item.results }}</a>
@@ -38,9 +38,6 @@ export default {
       ],
     };
   },
-  mounted() {
-    this.$store.dispatch("fetchResults");
-  },
   methods: {
     loadall() {
       this.$store.dispatch("fetchAllResults");
@@ -51,7 +48,7 @@ export default {
     results() {
       let _r = this.getResultList;
       let _final = [];
-      if (!!_r || !_r.length) {
+      if (_r.length > 0) {
         for (var i in _r) {
           let _results = _r[i].results.urls;
           let _domain = _r[i].domain;

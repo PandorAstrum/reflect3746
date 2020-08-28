@@ -18,17 +18,16 @@ export default {
   components: {
     StatusCard,
   },
-  data() {
-    return {
-      serverStatus: false,
-    };
+  befoereMounted() {
+    this.$store.dispatch("forceRefreshServer");
+    this.$store.dispatch("forceRefreshDatabase");
   },
   mounted() {
     this.$store.dispatch("refServer");
     this.$store.dispatch("refDatabase");
   },
   methods: {
-    ...mapActions(["refServer", "refDatabase", "stopJobs"]),
+    ...mapActions(["forceRefreshServer", "forceRefreshDatabase"]),
     gotoLogs() {
       this.$router.push("/logs"); // route to logs
     },
@@ -44,6 +43,7 @@ export default {
       "getDatabaseObj",
       "getInProgress",
     ]),
+
     cards() {
       let _cards = [
         {
@@ -53,7 +53,7 @@ export default {
             ? `Running on port ${this.getServerHost}`
             : "Not Connected",
           header: "STATUS",
-          btn: { text: "REFRESH", action: this.refServer },
+          btn: { text: "REFRESH", action: this.forceRefreshServer },
         },
         {
           name: "Database",
@@ -62,7 +62,7 @@ export default {
             ? `${this.getDatabaseObj.nodes}`
             : "Not Connected",
           header: "STATUS",
-          btn: { text: "REFRESH", action: this.refDatabase },
+          btn: { text: "REFRESH", action: this.forceRefreshDatabase },
         },
         {
           name: "Running",

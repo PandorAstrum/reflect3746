@@ -2,7 +2,9 @@ import axios from "axios";
 
 let state = {
   inProgress: false,
+  isCompleted: false,
   spiderSelection: [],
+  hostName: "",
 };
 let mutations = {
   setInProgress: (state, status) => {
@@ -11,15 +13,21 @@ let mutations = {
   setSpiderSelection: (state, list) => {
     state.spiderSelection = list;
   },
+  setIsCompleted: (state, status) => {
+    state.isCompleted = false;
+  },
+  setHostName: (state, inputs) => {
+    state.hostName = inputs;
+  },
 };
 
 let actions = {
   spiderList: async ({ commit, state }) => {
-    if (!!state.spiderSelection || !state.spiderSelection.length) {
+    if (!state.spiderSelection.length) {
       await axios
         .get("http://127.0.0.1:5000/api/v1/spider")
         .then((response) => {
-          if (response.data.error == "Not Connected") {
+          if (response.data.Status === 404) {
             return;
           }
           let _temp = [];
@@ -33,11 +41,16 @@ let actions = {
         });
     }
   },
-  runSpider: async ({ commit }, params) => {
-    commit("setInProgress", true);
+  runSpider: async ({ commit, dispatch }, params) => {
     await axios
       .post("http://127.0.0.1:5000/api/v1/run", params)
-      .then((response) => {})
+      .then((response) => {
+        if (response.status === 200) {
+          commit("setInProgress", true);
+          commit("setResultList", [], { root: true });
+          dispatch("fetchResultsInterval", null, { root: true });
+        }
+      })
       .catch((error) => {
         console.log(error);
       });
@@ -49,6 +62,9 @@ let getters = {
   },
   getSpiderSelection: (state) => {
     return state.spiderSelection;
+  },
+  getIsCompleted: (state) => {
+    return state.isCompleted;
   },
 };
 

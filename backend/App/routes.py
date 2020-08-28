@@ -12,9 +12,10 @@ __desc__ = "API routes"
 """
 import crochet
 import json
+import re
 from datetime import datetime
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, make_response
 from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
 from scrapy.crawler import CrawlerRunner
@@ -25,6 +26,7 @@ from scraper.scraper import Scraper
 crochet.setup()                                             # initialize crochet
 urls_list = []                                              # temp store urls
 domain = ""
+exact_domain = ""
 scrape_in_progress = False                                  # progress flag
 scrape_complete = False                                     # complete flag
 _selected_spider = None                                     # Selected Spider
@@ -37,7 +39,7 @@ api = Blueprint('api', __name__, template_folder='templates')   # Blueprints
 @api.route('/server_status', methods=["GET"])
 def server_status():
     """Ping Server to check if it is running"""
-    return jsonify({'host': request.host, 'status': 200})
+    return jsonify({'host': request.host, 'Status': 200})
 
 
 @api.route('/database_status', methods=["GET"])
@@ -50,7 +52,7 @@ def database_status():
         username = db.mongoatlas.username
         nodes = db.mongoatlas.node_list[0]
         return jsonify({
-            "status": 200,
+            "Status": 200,
             "database": db_name,
             "nodes": nodes,
             "username": username
@@ -75,19 +77,21 @@ def spider():
     if db.mongoatlas.client is not None:
         _spiders_col = loads(dumps(db.spider_col.find()))
         return db.json_encoder.encode(_spiders_col)
-    return jsonify({"error": "Not Connected"})
+    return jsonify({"Status": 404, "msg": "Not Connected"})
 
 
 @api.route('/run', methods=["POST"])
 def spider_run():
     """start crawling"""
     global domain
+    global exact_domain
     global _selected_spider
     if request.method == "POST":
         params = request.get_json() # get form
         spider_kwargs = params["spider_kwargs"]
         _selected_spider = spider_kwargs['spider_name']
         spider_settings = params["spider_settings"]
+        exact_domain = re.match(r'^(?!https?).*$', spider_kwargs['baseurl'])
         domain = spider_kwargs['baseurl'].split("//")[-1].split("/")[0].split('?')[0]
         if db.scraped_col.count_documents({'domain': domain}, limit=1) != 0:   # if already exist
             existed_content = [loads(dumps(db.scraped_col.find_one({'domain': domain})))]
@@ -102,7 +106,8 @@ def spider_run():
                 # build params for spider
                 _spider_kwargs = {
                     "base_url": spider_kwargs['baseurl'],
-                    'domain': domain,
+                    'exact_domain': exact_domain,
+                    "domain": domain,
                     "spider_settings": {
                         "LOG_LEVEL": "INFO",
                         "DOWNLOAD_DELAY": spider_settings["delay"],
@@ -113,10 +118,10 @@ def spider_run():
                 scrape_with_crochet(_spider=_scraper.get_spider(_selected_spider),
                                     _kwargs=_spider_kwargs,
                                     _list_output=urls_list)                  # run spider
-                return jsonify({"Status": 200, "msg": "Scraping started"})
+                return jsonify({"msg": "Scraping started"})
             elif scrape_complete:
-                return jsonify({"Status": 200, "msg": "Scraping Completed"})
-            return jsonify({"Status": 102, "msg": "Scraping in Progress"})
+                return jsonify({"msg": "Scraping Completed"})
+            return jsonify({"msg": "Scraping in Progress"})
 
 
 @api.route('/results', methods=["GET"])
@@ -127,7 +132,7 @@ def get_results():
     global scrape_complete
     global scrape_in_progress
     if scrape_complete:
-        return jsonify({"Status": 200, "msg": "Scraping in progress", "records": json.dumps(urls_list)})
+        return jsonify({"Status": 200, "msg": "Scraping Complete", "records": urls_list})
     if scrape_in_progress:
         return jsonify({"Status": 102, "msg": "Scraping in progress"})
     return jsonify({"Status": 404, "msg": "Scraping Not Started"})
@@ -160,7 +165,7 @@ def get_logs():
     if db.mongoatlas.client is not None:
         all_logs = loads(dumps(db.logs_col.find()))
         return db.json_encoder.encode(all_logs)
-    return jsonify({"status": 200, "error": "Cant do it"})
+    return jsonify({"Status": 200, "error": "Cant do it"})
 
 
 # NECESSARY METHODS TO CALL =====================================================================

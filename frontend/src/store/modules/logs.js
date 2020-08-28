@@ -15,16 +15,27 @@ let mutations = {
 
 let actions = {
   fetchAllLogs: async ({ commit, state }) => {
-    if (!state.logList.length || !!state.logList) {
+    if (state.logList.length <= 0) {
       await axios
         .get("http://127.0.0.1:5000/api/v1/logs")
         .then((response) => {
-          commit("setLogList", response.data);
+          if (response.status === 200) commit("setLogList", response.data);
         })
         .catch((error) => {
           console.log(error);
         });
     }
+  },
+  updateLogs: async ({ commit, state }) => {
+    commit("setLogList", []);
+    await axios
+      .get("http://127.0.0.1:5000/api/v1/logs")
+      .then((response) => {
+        if (response.status === 200) commit("setLogList", response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   },
 };
 let getters = {

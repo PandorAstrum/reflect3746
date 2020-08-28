@@ -106,6 +106,26 @@ export default {
             delay: this.delay,
           },
         };
+
+        function extractHostname(url) {
+          var hostname;
+          //find & remove protocol (http, ftp, etc.) and get hostname
+
+          if (url.indexOf("//") > -1) {
+            hostname = url.split("/")[2];
+          } else {
+            hostname = url.split("/")[0];
+          }
+
+          //find & remove port number
+          hostname = hostname.split(":")[0];
+          //find & remove "?"
+          hostname = hostname.split("?")[0];
+
+          return hostname;
+        }
+        this.$store.commit("setHostName", extractHostname(this.website));
+
         this.$store.dispatch("runSpider", params); // call actions pass obj as param
         this.$router.push("/data");
       }

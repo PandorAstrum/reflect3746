@@ -21,7 +21,7 @@
                 <a href="#" @click.prevent="callData($event, item.job_id)">{{ item.job_id }}</a>
               </td>
               <td>{{ item.spidername }}</td>
-              <td>{{ item.timestamp | !!item ? '': dateFormater }}</td>
+              <td>{{ item.timestamp | dateFormater }}</td>
             </tr>
           </tbody>
         </template>
@@ -39,14 +39,14 @@ export default {
   },
   computed: {
     ...mapGetters(["getLogList"]),
-    ...mapActions(["fetchAllLogs"]),
   },
   methods: {
     reload() {
-      this.fetchAllLogs;
+      this.$store.dispatch("updateLogs");
     },
     callData(event, _id) {
       this.$store.commit("setResultsID", _id);
+      this.$store.dispatch("fetchResultsByID");
       this.$router.push("/data");
     },
   },

@@ -10,33 +10,50 @@ let mutations = {
 };
 
 let actions = {
-  fetchResults: async ({ commit, rootState }) => {
-    if (!!rootState.logs.resultsID || !rootState.logs.resultsID.length) {
-      await axios
-        .get(`http://127.0.0.1:5000/api/v1/results/${rootState.logs.resultsID}`)
-        .then((response) => {
-          commit("setResultList", response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    } else {
+  fetchResultsByID: async ({ commit, rootState }) => {
+    if (rootState.jobs.inProgress === false) {
+      if (rootState.logs.resultsID !== "") {
+        await axios
+          .get(
+            `http://127.0.0.1:5000/api/v1/results/${rootState.logs.resultsID}`
+          )
+          .then((response) => {
+            if (response.status === 200) {
+              commit("setResultList", []);
+              commit("setResultList", response.data);
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
     }
+    commit("setResultsID", "");
+  },
 
+  fetchResultsInterval: async ({ commit, rootState, dispatch }) => {
     if (rootState.jobs.inProgress === true) {
-      commit("setResultList", []);
       let _timer = setInterval(() => {
         axios
           .get("http://127.0.0.1:5000/api/v1/results")
           .then((response) => {
-            if (response.data.Status == 200) {
-              console.log("scraping complete ");
-
+            if (response.data.Status === 200) {
               commit("setInProgress", false, { root: true });
-              commit("setResultList", response.data.records);
-
               if (rootState.jobs.inProgress === false) {
                 clearInterval(_timer);
+                dispatch("updateLogs", null, { root: true });
+                let _domain = rootState.jobs.hostName;
+                let _obj = { domain: "", results: { urls: [] } };
+                for (var item in response.data.records) {
+                  _obj["results"]["urls"].push(
+                    response.data.records[item].urls
+                  );
+                }
+                _obj["domain"] = _domain;
+                let _records = [];
+                _records.push(_obj);
+
+                commit("setResultList", _records);
               }
             }
           })
@@ -52,7 +69,9 @@ let actions = {
     await axios
       .get(`http://127.0.0.1:5000/api/v1/all`)
       .then((response) => {
-        commit("setResultList", response.data);
+        if (response.status === 200) {
+          commit("setResultList", response.data);
+        }
       })
       .catch((error) => {
         console.log(error);
