@@ -68,14 +68,9 @@ def database_status():
         })
 
 
-@api.route('/spider', methods=["GET", "POST"])
+@api.route('/spider', methods=["GET"])
 def spider():
     """Query Spider or Create one"""
-    if request.method == "POST":
-        """Create a spider via query string parameters."""
-        # get name and parameter from FORM
-        # db collection add
-        return
     if db.mongoatlas.client is not None:
         _spiders_col = loads(dumps(db.spider_col.find()))
         return db.json_encoder.encode(_spiders_col)
@@ -90,10 +85,11 @@ def spider_run():
     if request.method == "POST":
         params = request.get_json()                                 # get form
         spider_kwargs = params["spider_kwargs"]                     # get spider arguments
-        _selected_spider = spider_kwargs['spider_name']
+        _selected_spider = spider_kwargs['spider_name']             # get spider name
         spider_settings = params["spider_settings"]                 # get spider settings
-        exact_domain = tldextract.extract(spider_kwargs["baseurl"]).registered_domain
-        if db.scraped_col.count_documents({'domain': exact_domain}, limit=1) != 0:   # if already exist
+        dynamic_js = spider_settings['dynamicjs']                   # get splash usage flag
+        exact_domain = tldextract.extract(spider_kwargs["baseurl"]).registered_domain   # etract domain
+        if db.scraped_col.count_documents({'domain': exact_domain}, limit=1) != 0:      # if already exist
             existed_content = [loads(dumps(db.scraped_col.find_one({'domain': exact_domain})))]
             return db.json_encoder.encode(existed_content)
         else:
@@ -103,12 +99,11 @@ def spider_run():
             if not scrape_in_progress:
                 urls_list = []
                 scrape_in_progress = True
-                print(spider_settings)
                 # build params for spider
                 _spider_kwargs = {
                     "base_url": spider_kwargs['baseurl'],
                     "domain": exact_domain,
-                    "spider_settings": spider_settings
+                    "dynamic": dynamic_js
                 }
 
                 scrape_with_crochet(_spider=_scraper.get_spider(_selected_spider),
@@ -132,6 +127,8 @@ def get_results():
         if len(urls_list) > 0:
             return jsonify({"Status": 200, "msg": "Scraping Complete", "urls": urls_list,
                             "_id": str(current_inserted.inserted_id)})
+        else:
+            return jsonify({"Status": 400, "msg": "No Data Found on this domain"})
 
     if scrape_in_progress:
         return jsonify({"Status": 102, "msg": "Scraping in progress"})

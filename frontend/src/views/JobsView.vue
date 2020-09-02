@@ -38,9 +38,6 @@
         </v-col>
         <v-col cols="11">
           <v-row>
-            <v-switch class="mx-4" v-model="debug" label="DEBUG"></v-switch>
-          </v-row>
-          <v-row>
             <v-switch class="mx-4" v-model="dynamicjs" label="Dynamic js"></v-switch>
           </v-row>
         </v-col>
@@ -72,7 +69,6 @@ export default {
     return {
       website: "",
       select: null,
-      debug: false,
       dynamicjs: false,
     };
   },
@@ -91,7 +87,6 @@ export default {
             spider_name: this.select,
           },
           spider_settings: {
-            debug: this.debug ? "DEBUG" : "INFO",
             dynamicjs: this.dynamicjs,
           },
         };

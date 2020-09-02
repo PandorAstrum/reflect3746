@@ -60,6 +60,13 @@ let actions = {
                 }
               }
             }
+            if (response.data.Status === 400) {
+              commit("setInProgress", false, { root: true });
+              if (rootState.jobs.inProgress === false) {
+                clearInterval(_timer);
+                alert(response.data.msg);
+              }
+            }
           })
           .catch((error) => {
             console.log(error);
