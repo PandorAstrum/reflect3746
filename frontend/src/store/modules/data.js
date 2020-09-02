@@ -86,9 +86,24 @@ let actions = {
     await axios
       .post(`http://127.0.0.1:5000/api/v1/mutations`, params)
       .then((response) => {
-        // if (response.status === 200) {
-        //   commit("setResultList", response.data);
-        // }
+        if (response.status === 200) {
+          commit("setResultList", []);
+          commit("setResultList", response.data);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  },
+
+  deleteDoc: async ({ commit }, params) => {
+    await axios
+      .post(`http://127.0.0.1:5000/api/v1/deletion`, params)
+      .then((response) => {
+        if (response.status === 200) {
+          commit("setResultList", []);
+          commit("setResultList", response.data);
+        }
       })
       .catch((error) => {
         console.log(error);

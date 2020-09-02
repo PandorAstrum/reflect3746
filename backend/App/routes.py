@@ -18,6 +18,7 @@ from datetime import datetime
 from flask import Blueprint, jsonify, request, make_response
 from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
+from pymongo import ReturnDocument
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
 
@@ -171,22 +172,35 @@ def get_logs():
 def mutate_entry():
     """Edit the urls edit or delete"""
     if request.method == "POST":
-        params = request.get_json()  # get form
-        # ids = params["ids"]  # get doc id
-        # url_old = params["old_entry"]
-        # url_modified = params["modified_entry"]
-        print(params)
-        # print(f"id is {ids}, old url : {url_old} will be replaced with {url_modified}")
+        params = request.get_json()                                                 # get form
+        ids = params["_id"]                                                         # get doc id
+        index = params["index"]                                                # get index of element
+        url_modified = params["modified_entry"]                                     # new value
 
-        # if db.mongoatlas.client is not None:
-        #     db.scraped_col.update(
-        #         {'_id': ObjectId(ids)},
-        #         {'$set': {
-        #             'results': existing + 1
-        #         }
-        #         })
-        return ""
+        if db.mongoatlas.client is not None:
+            captured_doc = [loads(dumps(db.scraped_col.find_one_and_update(
+                {'_id': ObjectId(ids)},
+                {"$set": {f"urls.{index}": url_modified}},
+                return_document=ReturnDocument.AFTER
+            )))]
+            return db.json_encoder.encode(captured_doc)
 
+
+@api.route('/deletion', methods=["POST"])
+def delete_entry():
+    """Delete the urls edit or delete"""
+    if request.method == "POST":
+        params = request.get_json()                                                 # get form
+        ids = params["_id"]                                                         # get doc id
+        value = params['value']                                                     # get the value to be deleted
+
+        if db.mongoatlas.client is not None:
+            captured_doc = [loads(dumps(db.scraped_col.find_one_and_update(
+                {'_id': ObjectId(ids)},
+                {'$pull': {"urls": value}},
+                return_document=ReturnDocument.AFTER
+            )))]
+            return db.json_encoder.encode(captured_doc)
 
 # NECESSARY METHODS TO CALL =====================================================================
 @crochet.run_in_reactor

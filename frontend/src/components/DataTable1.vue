@@ -18,23 +18,24 @@
       <template v-slot:item.urls="{ item }">
         <a :href="item.urls">{{ item.urls }}</a>
         <div v-show="false">{{item.ids}}</div>
-        <v-btn icon @click="appearDialog($event, item.ids, item.urls)">
+        <div v-show="false">{{item.index}}</div>
+        <v-btn icon @click="appearDialog($event, 'edit', item.ids, item.index, item.urls)">
           <v-icon>mdi-lead-pencil</v-icon>
         </v-btn>
 
-        <v-btn icon @click="remove">
+        <v-btn icon @click="appearDialog($event, 'remove', item.ids, item.index, item.urls)">
           <v-icon>mdi-delete</v-icon>
         </v-btn>
       </template>
     </v-data-table>
     <v-dialog v-model="dialog" width="500">
       <v-card>
-        <v-card-title class="headline grey lighten-2">Edit</v-card-title>
-        <v-text-field autofocus v-model="modified_entry"></v-text-field>
+        <v-card-title class="headline grey lighten-2">{{operations == "edit" ? "Edit": "Remove"}}</v-card-title>
+        <v-text-field autofocus v-model="modified_entry" v-if="operations == 'edit'"></v-text-field>
         <v-divider></v-divider>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="edit($event, selected_ids, modified_entry)">Okay</v-btn>
+          <v-btn color="primary" text @click="confirm($event, modified_entry)">Confirm</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -48,7 +49,8 @@ export default {
   data() {
     return {
       dialog: false,
-      old_entry: "",
+      index: 0,
+      operations: "",
       modified_entry: "",
       selected_ids: "",
       headers: [
@@ -77,30 +79,32 @@ export default {
     loadall() {
       this.$store.dispatch("fetchAllResults");
     },
-    appearDialog(event, ids, entry) {
-      this.old_entry = entry;
+    appearDialog(event, operations, ids, index, entry) {
+      this.index = index;
       this.modified_entry = entry;
       this.selected_ids = ids;
+      this.operations = operations;
       return (this.dialog = !this.dialog);
     },
-    edit(event, ids, new_entry) {
+    confirm(event, new_entry) {
       this.dialog = false;
-      // TODO: call action to mutation mongodb with selected ids and selected urls
-      this.$store.dispatch("mutateDoc", {
-        _id: this.selected_ids,
-        old_entry: this.old_entry,
-        modified_entry: new_entry,
-      });
-    },
-    remove(event, ids, urls) {
-      alert(`ids: ${ids} and urls ${urls}`);
-      // TODO: call action to mutation mongodb with selected ids and selected urls
+      if (this.operations == "edit") {
+        this.$store.dispatch("mutateDoc", {
+          _id: this.selected_ids,
+          index: this.index,
+          modified_entry: new_entry,
+        });
+      } else if (this.operations == "remove") {
+        this.$store.dispatch("deleteDoc", {
+          _id: this.selected_ids,
+          value: this.modified_entry,
+        });
+      }
     },
   },
   computed: {
     ...mapGetters(["getInProgress", "getResultList"]),
 
-    // TODO:
     results() {
       let _r = this.getResultList;
       let _final = [];
@@ -113,6 +117,7 @@ export default {
           _obj["website"] = _domain;
           _obj["urls"] = _urls[_u];
           _obj["ids"] = _ids;
+          _obj["index"] = _u;
           _final.push(_obj);
         }
       }
