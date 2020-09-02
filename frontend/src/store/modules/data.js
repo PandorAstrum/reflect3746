@@ -41,19 +41,23 @@ let actions = {
               commit("setInProgress", false, { root: true });
               if (rootState.jobs.inProgress === false) {
                 clearInterval(_timer);
-                dispatch("updateLogs", null, { root: true });
-                let _domain = rootState.jobs.hostName;
-                let _obj = { domain: "", results: { urls: [] } };
-                for (var item in response.data.records) {
-                  _obj["results"]["urls"].push(
-                    response.data.records[item].urls
-                  );
-                }
-                _obj["domain"] = _domain;
-                let _records = [];
-                _records.push(_obj);
 
-                commit("setResultList", _records);
+                if (response.data.urls.length > 0) {
+                  dispatch("updateLogs", null, { root: true });
+                  let _domain = rootState.jobs.hostName;
+                  let _urls = response.data.urls;
+                  let _id = response.data._id;
+
+                  let _obj = { domain: _domain, urls: _urls, _id: _id };
+
+                  let _records = [];
+                  _records.push(_obj);
+                  console.log(_records);
+
+                  commit("setResultList", _records);
+                } else {
+                  alert("No data found");
+                }
               }
             }
           })
@@ -72,6 +76,19 @@ let actions = {
         if (response.status === 200) {
           commit("setResultList", response.data);
         }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  },
+
+  mutateDoc: async ({ commit }, params) => {
+    await axios
+      .post(`http://127.0.0.1:5000/api/v1/mutations`, params)
+      .then((response) => {
+        // if (response.status === 200) {
+        //   commit("setResultList", response.data);
+        // }
       })
       .catch((error) => {
         console.log(error);

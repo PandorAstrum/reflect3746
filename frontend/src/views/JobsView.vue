@@ -38,19 +38,10 @@
         </v-col>
         <v-col cols="11">
           <v-row>
-            <v-switch class="mx-4" v-model="siteMap" label="Sitemap (If exist)"></v-switch>
+            <v-switch class="mx-4" v-model="debug" label="DEBUG"></v-switch>
           </v-row>
           <v-row>
-            <v-switch class="mx-4" v-model="downloadDelay" label="Delay"></v-switch>
-            <v-text-field v-model="delay" hint="enter seconds" :disabled="!downloadDelay"></v-text-field>
-          </v-row>
-          <v-row>
-            <v-switch class="mx-4" v-model="customProxie" label="Custom Proxy"></v-switch>
-            <v-text-field
-              label="proxies"
-              hint="enter multiple with commas"
-              :disabled="!customProxie"
-            ></v-text-field>
+            <v-switch class="mx-4" v-model="dynamicjs" label="Dynamic js"></v-switch>
           </v-row>
         </v-col>
       </v-row>
@@ -81,10 +72,8 @@ export default {
     return {
       website: "",
       select: null,
-      siteMap: false,
-      downloadDelay: false,
-      delay: 1,
-      customProxie: false,
+      debug: false,
+      dynamicjs: false,
     };
   },
   mounted() {
@@ -102,8 +91,8 @@ export default {
             spider_name: this.select,
           },
           spider_settings: {
-            sitemap: this.siteMap,
-            delay: this.delay,
+            debug: this.debug ? "DEBUG" : "INFO",
+            dynamicjs: this.dynamicjs,
           },
         };
 

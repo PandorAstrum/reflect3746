@@ -12,21 +12,22 @@ __desc__ = "API routes"
 """
 import crochet
 import json
-import re
+import tldextract
 from datetime import datetime
 
 from flask import Blueprint, jsonify, request, make_response
 from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
 from scrapy.crawler import CrawlerRunner
+from scrapy.utils.log import configure_logging
 
 from App import db
 from scraper.scraper import Scraper
 
 crochet.setup()                                             # initialize crochet
 urls_list = []                                              # temp store urls
-domain = ""
-exact_domain = ""
+current_inserted = None                                     # new inserted doc in mongo
+exact_domain = ""                                           # domain name from url
 scrape_in_progress = False                                  # progress flag
 scrape_complete = False                                     # complete flag
 _selected_spider = None                                     # Selected Spider
@@ -83,18 +84,16 @@ def spider():
 @api.route('/run', methods=["POST"])
 def spider_run():
     """start crawling"""
-    global domain
     global exact_domain
     global _selected_spider
     if request.method == "POST":
-        params = request.get_json() # get form
-        spider_kwargs = params["spider_kwargs"]
+        params = request.get_json()                                 # get form
+        spider_kwargs = params["spider_kwargs"]                     # get spider arguments
         _selected_spider = spider_kwargs['spider_name']
-        spider_settings = params["spider_settings"]
-        exact_domain = re.match(r'^(?!https?).*$', spider_kwargs['baseurl'])
-        domain = spider_kwargs['baseurl'].split("//")[-1].split("/")[0].split('?')[0]
-        if db.scraped_col.count_documents({'domain': domain}, limit=1) != 0:   # if already exist
-            existed_content = [loads(dumps(db.scraped_col.find_one({'domain': domain})))]
+        spider_settings = params["spider_settings"]                 # get spider settings
+        exact_domain = tldextract.extract(spider_kwargs["baseurl"]).registered_domain
+        if db.scraped_col.count_documents({'domain': exact_domain}, limit=1) != 0:   # if already exist
+            existed_content = [loads(dumps(db.scraped_col.find_one({'domain': exact_domain})))]
             return db.json_encoder.encode(existed_content)
         else:
             global scrape_in_progress
@@ -103,16 +102,12 @@ def spider_run():
             if not scrape_in_progress:
                 urls_list = []
                 scrape_in_progress = True
+                print(spider_settings)
                 # build params for spider
                 _spider_kwargs = {
                     "base_url": spider_kwargs['baseurl'],
-                    'exact_domain': exact_domain,
-                    "domain": domain,
-                    "spider_settings": {
-                        "LOG_LEVEL": "INFO",
-                        "DOWNLOAD_DELAY": spider_settings["delay"],
-                        "RANDOMIZE_DOWNLOAD_DELAY": True
-                    }
+                    "domain": exact_domain,
+                    "spider_settings": spider_settings
                 }
 
                 scrape_with_crochet(_spider=_scraper.get_spider(_selected_spider),
@@ -129,10 +124,14 @@ def get_results():
     """
     Get the results only if a spider has results
     """
+    global current_inserted
     global scrape_complete
     global scrape_in_progress
     if scrape_complete:
-        return jsonify({"Status": 200, "msg": "Scraping Complete", "records": urls_list})
+        if len(urls_list) > 0:
+            return jsonify({"Status": 200, "msg": "Scraping Complete", "urls": urls_list,
+                            "_id": str(current_inserted.inserted_id)})
+
     if scrape_in_progress:
         return jsonify({"Status": 102, "msg": "Scraping in progress"})
     return jsonify({"Status": 404, "msg": "Scraping Not Started"})
@@ -168,10 +167,32 @@ def get_logs():
     return jsonify({"Status": 200, "error": "Cant do it"})
 
 
+@api.route('/mutations', methods=["POST"])
+def mutate_entry():
+    """Edit the urls edit or delete"""
+    if request.method == "POST":
+        params = request.get_json()  # get form
+        # ids = params["ids"]  # get doc id
+        # url_old = params["old_entry"]
+        # url_modified = params["modified_entry"]
+        print(params)
+        # print(f"id is {ids}, old url : {url_old} will be replaced with {url_modified}")
+
+        # if db.mongoatlas.client is not None:
+        #     db.scraped_col.update(
+        #         {'_id': ObjectId(ids)},
+        #         {'$set': {
+        #             'results': existing + 1
+        #         }
+        #         })
+        return ""
+
+
 # NECESSARY METHODS TO CALL =====================================================================
 @crochet.run_in_reactor
 def scrape_with_crochet(_spider, _kwargs, _list_output):
     global _crawl_runner
+    configure_logging({'LOG_FORMAT': '%(levelname)s: %(message)s'})
     eventual = _crawl_runner.crawl(_spider, kwargs=_kwargs, urls_list=_list_output)
     eventual.addCallback(finished_scrape)
 
@@ -184,25 +205,24 @@ def finished_scrape(null):
     global scrape_complete
     global scrape_in_progress
     global urls_list
-    global domain
+    global current_inserted
+    global exact_domain
     global _selected_spider
     scrape_complete = True
     scrape_in_progress = False
 
-    _urls = {k: [d.get(k) for d in urls_list] for k in set().union(*urls_list)}
-    #build data to dump
-    scraped = {
-        "domain": domain,
-        "results": _urls,
-    }
-    returned_id = db.scraped_col.insert_one(scraped)
-    logs = {
-        "spidername": _selected_spider,
-        "domain": domain,
-        'timestamp': datetime.now(),
-        "job_id": returned_id.inserted_id
-    }
-    returned_id_2 = db.logs_col.insert_one(logs)
-
-
-
+    if len(urls_list) > 0:
+        # build data model to insert into mongodb
+        scraped = {
+            "domain": exact_domain,
+            "urls": urls_list,
+        }
+        current_inserted = db.scraped_col.insert_one(scraped)
+        logs = {
+            "spidername": _selected_spider,
+            "domain": exact_domain,
+            "found_urls": len(urls_list),
+            "timestamp": datetime.now(),
+            "job_id": current_inserted.inserted_id
+        }
+        returned_id_2 = db.logs_col.insert_one(logs)
